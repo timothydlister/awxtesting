@@ -1,0 +1,29 @@
+- name: "Demonstrate connecting to switches"
+  hosts: switches
+  gather_facts: no
+
+  tasks:
+    ###
+    # Collect data
+    ###
+    - name: Gather facts (ops)
+      ios_facts:
+      when: ansible_network_os == 'ios'
+    ###
+    # Demonstrate variables
+    ###
+
+    - name: Write facts to disk using a template
+      copy:
+        content: |
+          #jinja2: lstrip_blocks: True
+          IOS device info:
+            {% for host in groups['switches'] %}
+            Hostname: {{ hostvars[host].ansible_net_hostname }}
+            Version: {{ hostvars[host].ansible_net_version }}
+            Image: {{ hostvars[host].ansible_net_image }}
+            Model: {{ hostvars[host].ansible_net_model }}
+            Serial: {{ hostvars[host].ansible_net_serialnum }}
+            {% endfor %}
+        dest: ./switch-facts
+      run_once: yes
